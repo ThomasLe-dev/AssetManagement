@@ -1,9 +1,9 @@
 <template>
-    <div class="content" :class="[{ 'content--expand': isChangeWidth }]">
+    <div class="content">
         <div class="content--top">
             <div class="top-left">
                 <span class="font-weight--700">Điều Chuyển</span>
-                <section class="icon reload"></section>
+                <section class="icon reload" @click="this.loadData"></section>
             </div>
             <section class="layout__header__right center-y col-gap-11">
                 <!-- Button thêm chứng từ -->
@@ -84,42 +84,51 @@
 
                 <!-- ------------------------Body------------------------ -->
                 <div class="body-data">
-                    <div
-                        class="body--row row"
-                        v-for="(asset, index) in assets"
-                        :key="asset.FixedAssetId"
-                    >
-                        <div class="cell display--center-center border--right border--bottom">
-                            <input type="checkbox" />
-                        </div>
-                        <div class="cell display--center-center border--right border--bottom">
-                            {{ index + 1 }}
-                        </div>
-                        <div class="cell display--center-left border--right border--bottom pl-10">
-                            {{ asset.FixedAssetCode }}
-                        </div>
-                        <div class="cell display--center-center border--right border--bottom">
-                            {{ asset.FixedAssetName }}
-                        </div>
-                        <div class="cell display--center-center border--right border--bottom">
-                            {{ asset.StartUsingDate }}
-                        </div>
-                        <div class="cell display--center-right border--right border--bottom pr-10">
-                            {{ asset.Cost }}
-                        </div>
-                        <div class="cell display--center-right border--right border--bottom pr-10">
-                            {{ asset.Cost }}
-                        </div>
+                    <section v-if="!isLoadingDataTable">
                         <div
-                            class="cell display--center-left border--right border--bottom pl-10"
-                        ></div>
-                        <div class="cell display--center-center border--right border--bottom">
-                            <div class="center col-gap-16">
-                                <section class="icon edit"></section>
-                                <section class="icon delete"></section>
+                            class="body--row row"
+                            v-for="(asset, index) in assets"
+                            :key="asset.FixedAssetId"
+                        >
+                            <div class="cell display--center-center border--right border--bottom">
+                                <input type="checkbox" />
+                            </div>
+                            <div class="cell display--center-center border--right border--bottom">
+                                {{ index + 1 }}
+                            </div>
+                            <div
+                                class="cell display--center-left border--right border--bottom pl-10"
+                            >
+                                {{ asset.FixedAssetCode }}
+                            </div>
+                            <div class="cell display--center-center border--right border--bottom">
+                                {{ asset.FixedAssetName }}
+                            </div>
+                            <div class="cell display--center-center border--right border--bottom">
+                                {{ asset.StartUsingDate }}
+                            </div>
+                            <div
+                                class="cell display--center-right border--right border--bottom pr-10"
+                            >
+                                {{ asset.Cost }}
+                            </div>
+                            <div
+                                class="cell display--center-right border--right border--bottom pr-10"
+                            >
+                                {{ asset.Cost }}
+                            </div>
+                            <div
+                                class="cell display--center-left border--right border--bottom pl-10"
+                            ></div>
+                            <div class="cell display--center-center border--right border--bottom">
+                                <div class="center col-gap-16">
+                                    <section class="icon edit"></section>
+                                    <section class="icon delete"></section>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
+                    <section v-else><LoadingSkeleton v-for="i in 5" :key="i" /></section>
                 </div>
                 <div class="body-data__footer pr-4">
                     <div class="body--row row">
@@ -162,11 +171,11 @@
                     <!--  -->
 
                     <!-- Thay đổi trang -->
-                    <m-paging
-                        v-if="pageNumberEnd > 0"
+                    <!-- v-if="pageNumberEnd > 0" -->
+                    <m-paging                     
                         classPaging="footer__left__number-page"
                         v-model="pageNumber"
-                        :numberEnd="pageNumberEnd"
+                        :numberEnd="5"
                     />
                     <!--  -->
                 </section>
@@ -181,9 +190,7 @@
                 <div class="content--top">
                     <div class="top-left">
                         <!-- Button thông tin chi tiết -->
-                        <m-button>
-                            Thông tin chi tiết 
-                        </m-button>
+                        <m-button> Thông tin chi tiết </m-button>
                         <!--  -->
                     </div>
                     <div class="top-right">
@@ -204,32 +211,32 @@
                             Mã tài sản
                         </div>
                         <div
-                            class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
+                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
                         >
                             Tên tài sản
                         </div>
                         <div
-                            class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
+                            class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
                         >
                             Nguyên giá
                         </div>
                         <div
-                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
+                            class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
                         >
                             Giá trị còn lại
                         </div>
                         <div
-                            class="header cell display--center-center font-weight--700 border--top border--bottom"
+                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
                         >
                             Bộ phận sử dụng
                         </div>
                         <div
-                            class="header cell display--center-center font-weight--700 border--top border--bottom"
+                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
                         >
                             Bộ phận điều chuyển đến
                         </div>
                         <div
-                            class="header cell display--center-center font-weight--700 border--top border--bottom"
+                            class="header cell display--center-left font-weight--700 border--top border--bottom pl-10"
                         >
                             Lý do
                         </div>
@@ -246,20 +253,24 @@
                                 {{ 1 }}
                             </div>
                             <div
-                                class="body cell display--center-left border--right border--bottom pl-10"
+                                class="cell display--center-left border--right border--bottom pl-10"
                             >
-                                {{ asset.FixedAssetName }}
-                            </div>
-                            <div class="cell display--center-center border--right border--bottom">
-                                {{ asset.FixedAssetName }}
-                            </div>
-                            <div class="cell display--center-center border--right border--bottom">
-                                {{ asset.FixedAssetName }}
+                                {{ asset.FixedAssetCode }}
                             </div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
                             >
                                 {{ asset.FixedAssetName }}
+                            </div>
+                            <div
+                                class="cell display--center-right border--right border--bottom pr-10"
+                            >
+                                {{ asset.Cost }}
+                            </div>
+                            <div
+                                class="cell display--center-right border--right border--bottom pr-10"
+                            >
+                                {{ asset.Cost }}
                             </div>
                             <div class="cell display--center-center border--bottom">
                                 <div class="icon-function">
@@ -310,8 +321,12 @@
 </template>
 <script>
 import FixedAssetAPI from '../../api/FixedAsset.API'
+import LoadingSkeleton from '../fixed_asset/LoadingSkeleton.vue'
 export default {
     name: 'AssetTransferList',
+    components: {
+        LoadingSkeleton
+    },
     props: {
         isChangeWidth: {
             type: Boolean,
@@ -324,13 +339,15 @@ export default {
             assets: [],
 
             // ----------------------------- Paging -----------------------------
-            pageLimitList: [],
+            pageLimit: 20,
             // Tổng bản ghi
             totalRecords: 0,
             // Tổng trang
             totalPages: 0,
             // Trang hiện tại
-            currentPage: 1
+            currentPage: 1,
+            //Kiểm tra tình trạng load data của table
+            isLoadingDataTable: false
         }
     },
     created() {
@@ -338,21 +355,18 @@ export default {
     },
     methods: {
         // load data tạm thời
-        loadData() {
-            FixedAssetAPI.getFixedAssetPaging({
-                FixedAssetCodeOrName: '',
-                DepartmentName: '',
-                FixedAssetCategoryName: '',
-                PageLimit: 20,
-                PageNumber: 1
-            })
-                .then((res) => {
-                    this.assets = res.data.FixedAssets
-                    console.log(this.assets)
-                })
-                .catch((res) => {
-                    console.log(res)
-                })
+        async loadData() {
+            try {
+                this.isLoadingDataTable = true
+                let res = await FixedAssetAPI.getAllFixedAsset()
+                console.log(res)
+                this.assets = res.data
+            } catch (error) {
+                console.log(error)
+            }
+            setTimeout(() => {
+                this.isLoadingDataTable = false
+            }, 1000)
         },
         startResize(event) {
             event.preventDefault() // Ngăn chặn chọn văn bản khi kéo
@@ -389,21 +403,20 @@ export default {
 </script>
 <style scoped>
 .content {
-    height: 100%;
     box-sizing: border-box;
-    padding-bottom: 14px;
     display: flex;
+    width: 100%;
+    height: 100%;
     flex-direction: column;
     transition: all ease-in-out 0.1s;
     padding-top: 13px;
+    float: right;
+    padding-bottom: 14px;
 }
-
-/* .content--expand {
-    width: calc(100% - 66px);
-  } */
 
 .content--top {
     display: flex;
+    width: 100%;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -417,7 +430,7 @@ export default {
     column-gap: 8px;
 }
 
-.top-left button{
+.top-left > button {
     height: 26px !important;
 }
 
@@ -438,8 +451,6 @@ export default {
 .table {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 800px;
     background-color: var(--background-color-default);
     border-spacing: unset;
 }
@@ -450,9 +461,9 @@ export default {
     height: 35px;
 }
 
-.resizable-table__row{
+.resizable-table__row {
     display: grid;
-    grid-template-columns: 40px 120px 120px 180px 230px 150px 200px calc(100% - 960px);
+    grid-template-columns: 40px 100px 200px 160px 180px 180px 180px calc(100% - 1040px);
     height: 35px;
 }
 
@@ -472,18 +483,10 @@ export default {
     background-color: var(--background-color-table-head);
 }
 
-.header input[type='text'] {
-    width: 100%;
-    height: 100%;
-}
-
 .body--row:hover .cell {
     background-color: var(--table-body-hover);
 }
 
-.body {
-    color: var(--table-body-text-color);
-}
 .body-data {
     overflow-y: auto;
     max-height: 175px;
@@ -517,5 +520,119 @@ export default {
 
 .table-bot {
     flex: 1;
+}
+.table-container {
+    height: calc(698px - 39px);
+    width: 100%;
+    border-radius: 3.5px;
+}
+
+.table {
+    background-color: #ffffff;
+    border-spacing: unset;
+    border: unset;
+    border-radius: 3.5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #ffffff;
+}
+
+.table__head {
+    font-family: Roboto, sans-serif;
+    font-weight: 700;
+    text-align: left;
+    height: 38px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 15px;
+    cursor: context-menu;
+}
+
+.table__head--right {
+    text-align: right;
+}
+
+.table__head--center {
+    text-align: center;
+}
+
+#tbodyAsset {
+    height: calc(100% - 38px);
+}
+
+.table__body {
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+    height: 39px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 15px;
+    position: relative;
+}
+
+.tr--body-selected {
+    background-color: rgba(26, 164, 200, 0.2);
+}
+
+.tr--body {
+    cursor: pointer;
+}
+
+.tr--body:hover {
+    background-color: rgba(26, 164, 200, 0.2);
+}
+
+.tr--body > .table__body > .icon-function {
+    display: none;
+}
+
+.tr--body:hover > .table__body > .icon-function {
+    display: flex;
+    column-gap: 16px;
+}
+
+.table__body--right {
+    text-align: right;
+}
+
+.table__body--center {
+    text-align: center;
+}
+
+.table__body--center-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-function {
+    align-items: center;
+    justify-content: center;
+    column-gap: 16px;
+}
+
+.reload {
+    background-position: -110px -68px;
+    width: 20px;
+    height: 16px;
+    margin-left: 8px;
+}
+
+.addBox {
+    background-image: url('/icon/icons8-plus-32.png');
+    width: 18px;
+    height: 18px;
+    background-size: cover;
+    transform: scale(1.3);
+    margin-bottom: 2px;
+}
+
+.contact {
+    background-position: -67px -23px;
+    width: 18px;
+    height: 18px;
 }
 </style>
