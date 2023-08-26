@@ -1,13 +1,13 @@
 <template>
-    <div class="content">
-        <div class="content--top">
+    <div class="content" >
+        <div class="content--top" ref="contentTop">
             <div class="top-left">
                 <span class="font-weight--700">Điều Chuyển</span>
                 <section class="icon reload" @click="this.loadData"></section>
             </div>
             <section class="layout__header__right center-y col-gap-11">
                 <!-- Button thêm chứng từ -->
-                <m-button>
+                <m-button @click="isShowPopup = true">
                     <template #icon>
                         <section class="icon addBox"></section>
                     </template>
@@ -30,164 +30,187 @@
                 <!--  -->
             </section>
         </div>
-        <div class="content--body border--left border--right border--bottom">
-            <!-- ------------------------Table start------------------------ -->
-            <div class="table" ref="contentBody">
-                <!-- ------------------------Header------------------------ -->
-                <div class="header--row row pr-4">
-                    <div
-                        class="header cell display--center-center border--top border--right border--bottom"
-                    >
-                        <input type="checkbox" />
-                    </div>
-                    <div
-                        class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
-                    >
-                        STT
-                    </div>
-                    <div
-                        class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
-                    >
-                        Mã chứng từ
-                    </div>
-                    <div
-                        class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
-                    >
-                        Ngày điều chuyển
-                    </div>
-                    <div
-                        class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
-                    >
-                        Ngày chứng từ
-                    </div>
-                    <div
-                        class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
-                    >
-                        Nguyên giá
-                    </div>
-                    <div
-                        class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
-                    >
-                        Giá trị còn lại
-                    </div>
-                    <div
-                        class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
-                    >
-                        Ghi chú
-                    </div>
-                    <div
-                        class="header cell display--center-center font-weight--700 border--top border--bottom"
-                    >
-                        Chức năng
-                    </div>
-                </div>
-
-                <!-- ------------------------Body------------------------ -->
-                <div class="body-data">
-                    <section v-if="!isLoadingDataTable">
+        <div class="content--body border--left border--right border--bottom" ref="contentBody">
+            <div class="body-top" ref="bodyTop">
+                <!-- ------------------------Table start------------------------ -->
+                <div class="table">
+                    <!-- ------------------------Header------------------------ -->
+                    <div class="header--row row pr-4">
                         <div
-                            class="body--row row"
-                            v-for="(asset, index) in assets"
-                            :key="asset.FixedAssetId"
+                            class="header cell display--center-center border--top border--right border--bottom"
                         >
-                            <div class="cell display--center-center border--right border--bottom">
-                                <input type="checkbox" />
+                            <input type="checkbox" />
+                        </div>
+                        <div
+                            class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
+                        >
+                            STT
+                        </div>
+                        <div
+                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
+                        >
+                            Mã chứng từ
+                        </div>
+                        <div
+                            class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
+                        >
+                            Ngày điều chuyển
+                        </div>
+                        <div
+                            class="header cell display--center-center font-weight--700 border--top border--right border--bottom"
+                        >
+                            Ngày chứng từ
+                        </div>
+                        <div
+                            class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
+                        >
+                            Nguyên giá
+                        </div>
+                        <div
+                            class="header cell display--center-right font-weight--700 border--top border--right border--bottom pr-10"
+                        >
+                            Giá trị còn lại
+                        </div>
+                        <div
+                            class="header cell display--center-left font-weight--700 border--top border--right border--bottom pl-10"
+                        >
+                            Ghi chú
+                        </div>
+                        <div
+                            class="header cell display--center-center font-weight--700 border--top border--bottom"
+                        >
+                            Chức năng
+                        </div>
+                    </div>
+
+                    <!-- ------------------------Body------------------------ -->
+                    <div class="body-data">
+                        <section v-if="!isLoadingDataTable">
+                            <div
+                                class="body--row row"
+                                v-for="(asset, index) in assets"
+                                :key="asset.FixedAssetId"
+                            >
+                                <div
+                                    class="cell display--center-center border--right border--bottom"
+                                >
+                                    <input type="checkbox" />
+                                </div>
+                                <div
+                                    class="cell display--center-center border--right border--bottom"
+                                >
+                                    {{ index + 1 }}
+                                </div>
+                                <div
+                                    class="cell display--center-left border--right border--bottom pl-10"
+                                >
+                                    {{ asset.FixedAssetCode }}
+                                </div>
+                                <div
+                                    class="cell display--center-center border--right border--bottom"
+                                >
+                                    {{ asset.FixedAssetName }}
+                                </div>
+                                <div
+                                    class="cell display--center-center border--right border--bottom"
+                                >
+                                    {{ asset.StartUsingDate }}
+                                </div>
+                                <div
+                                    class="cell display--center-right border--right border--bottom pr-10"
+                                >
+                                    {{ asset.Cost }}
+                                </div>
+                                <div
+                                    class="cell display--center-right border--right border--bottom pr-10"
+                                >
+                                    {{ asset.Cost }}
+                                </div>
+                                <div
+                                    class="cell display--center-left border--right border--bottom pl-10"
+                                ></div>
+                                <div
+                                    class="cell display--center-center border--right border--bottom"
+                                >
+                                    <div class="center col-gap-16">
+                                        <section class="icon edit"></section>
+                                        <section class="icon delete"></section>
+                                    </div>
+                                </div>
                             </div>
+                        </section>
+                        <section v-else><LoadingSkeleton v-for="i in 5" :key="i" /></section>
+                    </div>
+                    <div class="body-data__footer pr-4">
+                        <div class="body--row row">
                             <div class="cell display--center-center border--right border--bottom">
-                                {{ index + 1 }}
                             </div>
+                            <div
+                                class="cell display--center-center border--right border--bottom"
+                            ></div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
+                            ></div>
+                            <div
+                                class="cell display--center-center border--right border--bottom"
+                            ></div>
+                            <div
+                                class="cell display--center-center border--right border--bottom"
+                            ></div>
+                            <div
+                                class="cell font-weight--700 display--center-right border--right border--bottom pr-10"
                             >
-                                {{ asset.FixedAssetCode }}
-                            </div>
-                            <div class="cell display--center-center border--right border--bottom">
-                                {{ asset.FixedAssetName }}
-                            </div>
-                            <div class="cell display--center-center border--right border--bottom">
-                                {{ asset.StartUsingDate }}
+                                90000000
                             </div>
                             <div
-                                class="cell display--center-right border--right border--bottom pr-10"
+                                class="cell font-weight--700 display--center-right border--right border--bottom pr-10"
                             >
-                                {{ asset.Cost }}
-                            </div>
-                            <div
-                                class="cell display--center-right border--right border--bottom pr-10"
-                            >
-                                {{ asset.Cost }}
+                                60000000
                             </div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
                             ></div>
-                            <div class="cell display--center-center border--right border--bottom">
-                                <div class="center col-gap-16">
-                                    <section class="icon edit"></section>
-                                    <section class="icon delete"></section>
-                                </div>
-                            </div>
+                            <div
+                                class="cell display--center-center border--right border--bottom"
+                            ></div>
                         </div>
-                    </section>
-                    <section v-else><LoadingSkeleton v-for="i in 5" :key="i" /></section>
-                </div>
-                <div class="body-data__footer pr-4">
-                    <div class="body--row row">
-                        <div class="cell display--center-center border--right border--bottom">
-                            <input type="checkbox" />
-                        </div>
-                        <div class="cell display--center-center border--right border--bottom"></div>
-                        <div
-                            class="cell display--center-left border--right border--bottom pl-10"
-                        ></div>
-                        <div class="cell display--center-center border--right border--bottom"></div>
-                        <div class="cell display--center-center border--right border--bottom"></div>
-                        <div class="cell display--center-right border--right border--bottom pr-10">
-                            90000000
-                        </div>
-                        <div class="cell display--center-right border--right border--bottom pr-10">
-                            60000000
-                        </div>
-                        <div
-                            class="cell display--center-left border--right border--bottom pl-10"
-                        ></div>
-                        <div class="cell display--center-center border--right border--bottom"></div>
                     </div>
                 </div>
-            </div>
-            <!-- ------------------------Table end------------------------ -->
+                <!-- ------------------------Table end------------------------ -->
 
-            <!-- Footer -->
-            <footer class="table__footer h-40 grid bg-white">
-                <!-- Footer left -->
-                <section class="table__footer_left center-y">
-                    <!-- Tổng số tài sản -->
-                    <section class="footer__left__info">
-                        Tổng số: <span>{{ 5 }}</span> bản ghi
+                <!-- Footer -->
+                <footer class="table__footer h-40 grid bg-white">
+                    <!-- Footer left -->
+                    <section class="table__footer_left center-y">
+                        <!-- Tổng số tài sản -->
+                        <section class="footer__left__info">
+                            Tổng số: <span>{{ 5 }}</span> bản ghi
+                        </section>
+                        <!--  -->
+
+                        <!-- Chọn số tài sản trong một trang -->
+                        <m-dropdown v-model="pageLimit" />
+                        <!--  -->
+
+                        <!-- Thay đổi trang -->
+                        <!-- v-if="pageNumberEnd > 0" -->
+                        <m-paging
+                            classPaging="footer__left__number-page"
+                            v-model="pageNumber"
+                            :numberEnd="5"
+                        />
+                        <!--  -->
                     </section>
-                    <!--  -->
-
-                    <!-- Chọn số tài sản trong một trang -->
-                    <m-dropdown v-model="pageLimit" />
-                    <!--  -->
-
-                    <!-- Thay đổi trang -->
-                    <!-- v-if="pageNumberEnd > 0" -->
-                    <m-paging                     
-                        classPaging="footer__left__number-page"
-                        v-model="pageNumber"
-                        :numberEnd="5"
-                    />
-                    <!--  -->
-                </section>
-            </footer>
-            <!--  -->
+                </footer>
+                <!--  -->
+            </div>
 
             <!-- ------------------------Resize bar------------------------ -->
             <div class="resize-bar border--top border--bottom" @mousedown="startResize"></div>
 
             <!-- ------------------------Table start------------------------ -->
-            <div class="resizable-table">
-                <div class="content--top">
+            <div class="resizable-table z-999" ref="resizableTable">
+                <div class="content--top" ref="tableTop">
                     <div class="top-left">
                         <!-- Button thông tin chi tiết -->
                         <m-button> Thông tin chi tiết </m-button>
@@ -317,15 +340,20 @@
                 <!--  -->
             </div>
         </div>
+        <AssetTransferPopup v-if="isShowPopup" @close="isShowPopup = false" />
     </div>
 </template>
+
 <script>
 import FixedAssetAPI from '../../api/FixedAsset.API'
 import LoadingSkeleton from '../fixed_asset/LoadingSkeleton.vue'
+import AssetTransferPopup from './AssetTransferPopup.vue'
+
 export default {
     name: 'AssetTransferList',
     components: {
-        LoadingSkeleton
+        LoadingSkeleton,
+        AssetTransferPopup
     },
     props: {
         isChangeWidth: {
@@ -335,31 +363,42 @@ export default {
     },
     data() {
         return {
-            // ----------------------------- Data -----------------------------
             assets: [],
-
-            // ----------------------------- Paging -----------------------------
             pageLimit: 20,
-            // Tổng bản ghi
             totalRecords: 0,
-            // Tổng trang
             totalPages: 0,
-            // Trang hiện tại
             currentPage: 1,
-            //Kiểm tra tình trạng load data của table
-            isLoadingDataTable: false
+            isLoadingDataTable: false,
+            isShowPopup: false,
+            startY: 0,
+            initialHeight: 0,
+            // ----------------------------- Resize table -----------------------------
+            // Hiển thị tooltip của icon resize
+            visible_tool_tip: false,
+            // Kiểm tra coi đã nhấn giữ icon resize chưa
+            isMouseDown: false,
+            // Điểm bắt đầu của chuột khi click vào khối div resize bar
+            startY: null,
+            // Chiều cao ban đầu của resizable table
+            initialHeight: null,
+            // Chiều cao ban đầu của resizable table (giá trị không thể đổi)
+            initialHeightFix: null,
+            // Chiều cao của resizable table khi đang resize
+            initialHeightAfterResize: null,
+            // Chiều cao ban đầu của table top (giá trị không thể đổi)
+            tableTopHeightFix: null,
+            // Thu gọn table bằng icon
+            isNarrow: false
         }
     },
-    created() {
+    mounted() {
         this.loadData()
     },
     methods: {
-        // load data tạm thời
         async loadData() {
             try {
                 this.isLoadingDataTable = true
                 let res = await FixedAssetAPI.getAllFixedAsset()
-                console.log(res)
                 this.assets = res.data
             } catch (error) {
                 console.log(error)
@@ -374,25 +413,27 @@ export default {
             document.addEventListener('mouseup', this.stopResize)
 
             this.startY = event.clientY // Lưu vị trí chuột xuất phát
-            this.initialHeight = parseFloat(
-                getComputedStyle(this.$el.querySelector('.resizable-table')).height
-            ) // Lưu kích thước ban đầu của resizable-table
+            this.initialHeight = this.$refs.resizableTable.clientHeight // Lưu kích thước ban đầu của resizable-table
         },
         resizing(event) {
             const movementY = this.startY - event.clientY // Tính toán khoảng cách di chuyển của chuột
             const newHeight = this.initialHeight + movementY // Tính toán chiều cao mới dựa trên kích thước ban đầu và khoảng cách di chuyển
 
-            const minHeight = 0 // Độ cao tối thiểu
-            const maxHeight = 8000 // Độ cao tối đa
-            console.log(this.$refs.contentBody.clientHeight)
-
+            const contentBodyHeight = this.$refs.contentBody.clientHeight
+            const minHeight = this.$refs.tableTop.clientHeight; // Độ cao tối thiểu
+            const maxHeight = contentBodyHeight // Độ cao tối đa
             // Áp dụng độ cao mới vào resizable-table và giữ nguyên con trỏ
-            this.$el.querySelector('.resizable-table').style.height = `${Math.min(
+            this.$refs.resizableTable.style.height = `${Math.min(
                 Math.max(newHeight, minHeight),
                 maxHeight
             )}px`
+            this.initialHeightAfterResize = this.$refs.resizableTable.clientHeight
+            this.$refs.bodyTop.style.height = `${
+                contentBodyHeight - Math.min(Math.max(newHeight, minHeight), maxHeight)
+            }px`
             document.body.style.cursor = 'ns-resize'
         },
+
         stopResize() {
             document.removeEventListener('mousemove', this.resizing)
             document.removeEventListener('mouseup', this.stopResize)
@@ -401,12 +442,13 @@ export default {
     }
 }
 </script>
+
 <style scoped>
 .content {
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    height: 100%;
+    height: 700px;
     flex-direction: column;
     transition: all ease-in-out 0.1s;
     padding-top: 13px;
@@ -438,6 +480,12 @@ export default {
     font-size: 20px;
 }
 
+.body-top{
+    display: flex;
+    flex-direction: column;
+
+}
+
 .content--body {
     width: 100%;
     height: calc(100% - 36px);
@@ -453,6 +501,7 @@ export default {
     flex-direction: column;
     background-color: var(--background-color-default);
     border-spacing: unset;
+    flex: 1;
 }
 
 .row {
@@ -506,7 +555,7 @@ export default {
 
 /* ------------------------------------------- Resize-bar ------------------------------------------- */
 .resize-bar {
-    height: 2px;
+    height: 8px;
     border-color: var(--resize-bar-color);
     background-color: var(--background-color-default);
     cursor: ns-resize;
@@ -619,15 +668,6 @@ thead {
     width: 20px;
     height: 16px;
     margin-left: 8px;
-}
-
-.addBox {
-    background-image: url('/icon/icons8-plus-32.png');
-    width: 18px;
-    height: 18px;
-    background-size: cover;
-    transform: scale(1.3);
-    margin-bottom: 2px;
 }
 
 .contact {
