@@ -4,6 +4,7 @@
     --text-light-title: #000000;
     --text-light-primary: #212121;
     --text-light-secondary: #666666;
+    --text-light-background: #c2e5fd;
 
     /* Background Dark */
     --text-dark-title: #ffffff;
@@ -65,7 +66,7 @@
     --border-table-row: #e0e0e0;
 
     /* ------------------------ Table ------------------------ */
-    --table-border-color: #e0dede;
+    --table-border-color: #dcdcdc;
     --table-body-hover: #d1edf4;
     --table-body-text-color: #0026ff;
 

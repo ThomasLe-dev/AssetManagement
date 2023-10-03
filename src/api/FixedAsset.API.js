@@ -83,7 +83,22 @@ const FixedAssetAPI = {
         return http.post(`${URL}/Export`, listFixedAssetId, {
             responseType: 'blob'
         })
-    }
+    },
+
+    getFixedAssetForTransfer(data) {
+        return http.post(`${URL}/FilterForTransfer`, data)
+    },
+
+    /**
+     * @description Check chứng từ phát sinh của tài sản
+     * @param {*} listFixedAssetId Danh sách Id cần export
+     * @returns
+     * @author @LB.Thành (06/09/2023)
+     */
+    checkTransferAsset(ids, action) {
+        return http.post(`${URL}/CheckTransfer?action=${action}`, ids  
+    )
+    },
 }
 
 export default FixedAssetAPI

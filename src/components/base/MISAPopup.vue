@@ -19,6 +19,7 @@
                     maxlength="50"
                     required
                     tabindex="1"
+                    :readonly="isTransfer"
                 />
 
                 <m-input
@@ -32,6 +33,7 @@
                     maxlength="100"
                     required
                     tabindex="2"
+                    :readonly="isTransfer"
                 />
 
                 <m-combobox
@@ -45,6 +47,7 @@
                     :maxlength="20"
                     required
                     tabindex="3"
+                    readonly
                 />
 
                 <m-input
@@ -67,6 +70,7 @@
                     :maxlength="20"
                     required
                     tabindex="4"
+                    :readonly="isTransfer"
                 />
 
                 <m-input
@@ -87,6 +91,7 @@
                     typeOfInput="number"
                     @focus="setInputFocus('quantity')"
                     required
+                    :readonly="isTransfer"
                     @keydown.up.stop="increaseCount"
                     @keydown.down.stop="decreaseCount"
                     tabindex="5"
@@ -108,6 +113,7 @@
                     typeOfInput="number"
                     @focus="setInputFocus('cost')"
                     required
+                    :readonly="isTransfer"
                     tabindex="6"
                 />
                 <m-input
@@ -118,6 +124,7 @@
                     v-model="LifeTime"
                     @focus="setInputFocus('lifeTime')"
                     required
+                    :readonly="isTransfer"
                     tabindex="7"
                 />
 
@@ -149,12 +156,13 @@
                     @focus="setInputFocus('yearDepreciation')"
                     required
                     tabindex="8"
+                    :readonly="isTransfer"
                 />
 
                 <m-input
                     classLabel="trackedYear"
                     :label="labelForm.TrackedYear"
-                    readonly
+                    :readonly="isTransfer"
                     tabindex="-1"
                     v-model="TrackedYear"
                     typeOfInput="number"
@@ -172,6 +180,7 @@
                     :placeholder="placeholderForm.time"
                     required
                     tabindex="9"
+                    :readonly="isTransfer"
                 >
                     <template #iconRight>
                         <section class="wrapper-icon absolute r-6">
@@ -190,6 +199,7 @@
                     :placeholder="placeholderForm.time"
                     required
                     tabindex="10"
+                    :readonly="isTransfer"  
                 >
                     <template #iconRight>
                         <section class="wrapper-icon absolute r-6">
@@ -332,6 +342,7 @@ export default {
     data() {
         return {
             // Data from
+            FixedAssetId: null,
             FixedAssetCode: '',
             FixedAssetName: '',
             DepartmentCode: '',
@@ -339,6 +350,7 @@ export default {
             FixedAssetCategoryCode: '',
             FixedAssetCategoryName: '',
             Quantity: '',
+            isTransfer: false,
             Cost: '',
             LifeTime: '',
             TrackedYear: '',
@@ -484,7 +496,7 @@ export default {
 
             if (this.FixedAssetCode === '') {
                 hasMissingFields = true
-                missingFields += this.labelForm.FixedAssetCode + ', '
+                missingFields += this.labelForm.FixedAssetCode 
                 if (fieldToFocus === null) {
                     fieldToFocus = 'fixedAssetCode'
                 }
@@ -492,7 +504,7 @@ export default {
 
             if (this.FixedAssetName === '') {
                 hasMissingFields = true
-                missingFields += this.labelForm.FixedAssetName + ', '
+                missingFields += this.labelForm.FixedAssetName 
                 if (fieldToFocus === null) {
                     fieldToFocus = 'fixedAssetName'
                 }
@@ -500,7 +512,7 @@ export default {
 
             if (this.DepartmentCode === '') {
                 hasMissingFields = true
-                missingFields += this.labelForm.DepartmentCode + ', '
+                missingFields += this.labelForm.DepartmentCode 
                 if (fieldToFocus === null) {
                     fieldToFocus = 'departmentCode'
                 }
@@ -787,6 +799,7 @@ export default {
         }
         // Update FixedAsset
         else {
+            this.FixedAssetId = this.fixedAsset.FixedAssetId
             this.FixedAssetName = this.fixedAsset.FixedAssetName
             this.DepartmentCode = this.fixedAsset.DepartmentCode
             this.DepartmentName = this.fixedAsset.DepartmentName
@@ -803,6 +816,11 @@ export default {
             this.StartUsingDate = this.convertDate(this.fixedAsset.StartUsingDate)
             if (this.action === 'update') {
                 this.FixedAssetCode = this.fixedAsset.FixedAssetCode
+                let obj = []
+                obj.push(this.fixedAsset.FixedAssetId)
+                FixedAssetAPI.checkTransferAsset(obj, 1).then().catch(item => {
+                    this.isTransfer = true
+                })
             } else {
                 this.getFixedAssetCode()
             }

@@ -26,6 +26,7 @@
                 <m-sidebarItem 
                     iconDown order="2" 
                     :subItems="this.$_MISAResource.VN.Asset"
+                    class="ths"
                 >Tài sản</m-sidebarItem
                 >
                 <m-tooltip content="Tài sản" type="right" />
@@ -96,3 +97,9 @@ export default {
     }
 }
 </script>
+<style scoped>
+.ths{
+    background-color: var(--background-active-icon);
+    border-radius: 4px;
+}
+</style>

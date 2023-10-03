@@ -3,7 +3,7 @@
         <section
             class="table__row h-40 grid center-y"
             :class="{ 'row-active': checked }"
-            @dblclick=";(isShowForm = true), (action = 'update')"
+            @dblclick="showFormEdit()"
             @click.ctrl="changeChecked(!checked)"
             @contextmenu.stop.prevent="
                 (event) => {
@@ -186,6 +186,11 @@ export default {
          */
         formatNumber(number) {
             return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+        },
+        showFormEdit(){
+            this.isShowForm = true
+            this.action = 'update'
+            this.$emit('openId', this.fixedAsset.FixedAssetId)
         }
     },
     watch: {

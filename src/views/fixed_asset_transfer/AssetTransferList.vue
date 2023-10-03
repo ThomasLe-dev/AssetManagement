@@ -1,13 +1,25 @@
 <template>
-    <div class="content" >
+    <div class="content">
         <div class="content--top" ref="contentTop">
             <div class="top-left">
-                <span class="font-weight--700">Điều Chuyển</span>
-                <section class="icon reload" @click="this.loadData"></section>
+                <section class="center-y" v-if="selectedRows.length == 0">
+                    <span class="font-weight--700">Điều Chuyển</span>
+                    <section class="icon reload" @click="this.loadAllTransferAsset"></section>
+                </section>
+                <section class="header__right-delete" v-if="selectedRowsByCheckBox.length >= 1">
+                    <span
+                        >Đã chọn:
+                        <span class="font-weight--700">{{
+                            selectedRowsByCheckBox.length
+                        }}</span></span
+                    >
+                    <span class="uncheck-option" @click="btnUncheckedAll()">Bỏ chọn</span>
+                    <button class="delete-option" @click="callToastDelete()">Xóa</button>
+                </section>
             </div>
             <section class="layout__header__right center-y col-gap-11">
                 <!-- Button thêm chứng từ -->
-                <m-button @click="isShowPopup = true">
+                <m-button @click=";(isShowPopup = true), (this.action = 'create')">
                     <template #icon>
                         <section class="icon addBox"></section>
                     </template>
@@ -87,14 +99,29 @@
                     <div class="body-data">
                         <section v-if="!isLoadingDataTable">
                             <div
-                                class="body--row row"
-                                v-for="(asset, index) in assets"
-                                :key="asset.FixedAssetId"
+                                class="body--row row tr--body"
+                                v-for="(transferAsset, index) in transferAssets"
+                                :key="transferAsset.TransferAssetId"
+                                :class="{
+                                    'checked--row':
+                                        selectedRows.includes(transferAsset) ||
+                                        selectedRowsByCheckBox.includes(transferAsset)
+                                }"
+                                @dblclick="loadDataforEditForm(transferAsset)"
+                                @click.exact.stop="
+                                    loadTransferAssetDetail(transferAsset.TransferAssetId)
+                                "
+                                @click.ctrl.stop="callRowOnCtrlClick(transferAsset)"
                             >
                                 <div
                                     class="cell display--center-center border--right border--bottom"
+                                    @click.stop="callRowOnClickByCheckBox(transferAsset)"
                                 >
-                                    <input type="checkbox" />
+                                    <input
+                                        type="checkbox"
+                                        @click.stop
+                                        :checked="selectedRowsByCheckBox.includes(transferAsset)"
+                                    />
                                 </div>
                                 <div
                                     class="cell display--center-center border--right border--bottom"
@@ -104,37 +131,49 @@
                                 <div
                                     class="cell display--center-left border--right border--bottom pl-10"
                                 >
-                                    {{ asset.FixedAssetCode }}
+                                    {{ transferAsset.TransferAssetCode }}
                                 </div>
                                 <div
                                     class="cell display--center-center border--right border--bottom"
                                 >
-                                    {{ asset.FixedAssetName }}
+                                    {{ formatDate(transferAsset.TransferDate) }}
                                 </div>
                                 <div
                                     class="cell display--center-center border--right border--bottom"
                                 >
-                                    {{ asset.StartUsingDate }}
+                                    {{ formatDate(transferAsset.TransactionDate) }}
                                 </div>
                                 <div
                                     class="cell display--center-right border--right border--bottom pr-10"
                                 >
-                                    {{ asset.Cost }}
+                                    {{ formatNumber(transferAsset.Cost) }}
                                 </div>
                                 <div
                                     class="cell display--center-right border--right border--bottom pr-10"
                                 >
-                                    {{ asset.Cost }}
+                                    {{ formatNumber(transferAsset.RemainCost) }}
                                 </div>
                                 <div
                                     class="cell display--center-left border--right border--bottom pl-10"
-                                ></div>
+                                >
+                                    {{ transferAsset.Note }}
+                                </div>
                                 <div
                                     class="cell display--center-center border--right border--bottom"
                                 >
                                     <div class="center col-gap-16">
-                                        <section class="icon edit"></section>
-                                        <section class="icon delete"></section>
+                                        <section
+                                            class="icon onlyC"
+                                            @click="loadDataForViewOnly(transferAsset)"
+                                        ></section>
+                                        <section
+                                            class="icon edit"
+                                            @click="loadDataforEditForm(transferAsset)"
+                                        ></section>
+                                        <section
+                                            class="icon delete"
+                                            @click="callToastDeleteSingle(transferAsset)"
+                                        ></section>
                                     </div>
                                 </div>
                             </div>
@@ -143,8 +182,9 @@
                     </div>
                     <div class="body-data__footer pr-4">
                         <div class="body--row row">
-                            <div class="cell display--center-center border--right border--bottom">
-                            </div>
+                            <div
+                                class="cell display--center-center border--right border--bottom"
+                            ></div>
                             <div
                                 class="cell display--center-center border--right border--bottom"
                             ></div>
@@ -160,12 +200,12 @@
                             <div
                                 class="cell font-weight--700 display--center-right border--right border--bottom pr-10"
                             >
-                                90000000
+                                {{ formatNumber(costTotal()) }}
                             </div>
                             <div
                                 class="cell font-weight--700 display--center-right border--right border--bottom pr-10"
                             >
-                                60000000
+                                {{ formatNumber(remainTotal()) }}
                             </div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
@@ -184,20 +224,20 @@
                     <section class="table__footer_left center-y">
                         <!-- Tổng số tài sản -->
                         <section class="footer__left__info">
-                            Tổng số: <span>{{ 5 }}</span> bản ghi
+                            Tổng số: <span>{{ TotalRecords }}</span> bản ghi
                         </section>
                         <!--  -->
 
                         <!-- Chọn số tài sản trong một trang -->
-                        <m-dropdown v-model="pageLimit" />
+                        <m-dropdown v-model="pageLimitOfTrans" />
                         <!--  -->
 
                         <!-- Thay đổi trang -->
                         <!-- v-if="pageNumberEnd > 0" -->
                         <m-paging
                             classPaging="footer__left__number-page"
-                            v-model="pageNumber"
-                            :numberEnd="5"
+                            v-model="pageNumberOfTrans"
+                            :numberEnd="pageNumberEndOfTrans"
                         />
                         <!--  -->
                     </section>
@@ -269,44 +309,46 @@
                     <div class="body-data">
                         <div
                             class="body--row resizable-table__row"
-                            v-for="asset in assets"
-                            :key="asset.FixedAssetId"
+                            v-for="(transferAssetDetail, index) in details"
+                            :key="transferAssetDetail.TransferAssetDetailId"
                         >
                             <div class="cell display--center-center border--right border--bottom">
-                                {{ 1 }}
+                                {{ index + 1 }}
                             </div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
                             >
-                                {{ asset.FixedAssetCode }}
+                                {{ transferAssetDetail.FixedAssetCode }}
                             </div>
                             <div
                                 class="cell display--center-left border--right border--bottom pl-10"
                             >
-                                {{ asset.FixedAssetName }}
+                                {{ transferAssetDetail.FixedAssetName }}
                             </div>
                             <div
                                 class="cell display--center-right border--right border--bottom pr-10"
                             >
-                                {{ asset.Cost }}
+                                {{ formatNumber(transferAssetDetail.Cost) }}
                             </div>
                             <div
                                 class="cell display--center-right border--right border--bottom pr-10"
                             >
-                                {{ asset.Cost }}
+                                {{ formatNumber(transferAssetDetail.RemainderCost) }}
                             </div>
-                            <div class="cell display--center-center border--bottom">
-                                <div class="icon-function">
-                                    <MISATooltip bottom content="Chỉnh sửa">
-                                        <MISAIcon edit background></MISAIcon>
-                                    </MISATooltip>
-                                    <MISATooltip bottom content="Sao chép">
-                                        <MISAIcon copy background></MISAIcon>
-                                    </MISATooltip>
-                                    <MISATooltip bottom content="Xóa">
-                                        <MISAIcon deleteIcon background></MISAIcon>
-                                    </MISATooltip>
-                                </div>
+                            <div
+                                class="cell display--center-left border--right border--bottom pl-10"
+                            >
+                                {{ transferAssetDetail.OldDepartmentName }}
+                            </div>
+                            <div
+                                class="cell display--center-left border--right border--bottom pl-10"
+                            >
+                                {{ transferAssetDetail.TransferDepartmentName }}
+                            </div>
+                            <div
+                                class="cell display--center-left border--right border--bottom pl-10"
+                            >
+                                {{ transferAssetDetail.Reason }}
                             </div>
                         </div>
                     </div>
@@ -319,7 +361,7 @@
                     <section class="table__footer_left center-y">
                         <!-- Tổng số tài sản -->
                         <section class="footer__left__info">
-                            Tổng số: <span>{{ 5 }}</span> bản ghi
+                            Tổng số: <span>{{ totalDetails }}</span> bản ghi
                         </section>
                         <!--  -->
 
@@ -329,10 +371,9 @@
 
                         <!-- Thay đổi trang -->
                         <m-paging
-                            v-if="pageNumberEnd > 0"
                             classPaging="footer__left__number-page"
                             v-model="pageNumber"
-                            :numberEnd="pageNumberEnd"
+                            :numberEnd="1"
                         />
                         <!--  -->
                     </section>
@@ -340,20 +381,106 @@
                 <!--  -->
             </div>
         </div>
-        <AssetTransferPopup v-if="isShowPopup" @close="isShowPopup = false" />
+        <AssetTransferPopup
+            v-if="isShowPopup"
+            @close="isShowPopup = false"
+            @updateListTransferAsset="
+                (action) => {
+                    updateListTransferAsset(action)
+                }
+            "
+            :action="action"
+            :transferAssetDetails="transferAssetDetails"
+        />
+
+        <!-- Thông báo thành công -->
+        <section class="toast__message z-999" v-if="isShowToastMessage">
+            <m-toast :typeToast="toastMessageType" :content="toastMessageContent" />
+        </section>
+        <!--  -->
+        <div v-if="isShowToastDeleteSingle" class="blur">
+            <TransferToast typeToast="warning" :content="toast_content_delete_single">
+                <m-button
+                    typeButton="outline"
+                    width="100px"
+                    style="border: none"
+                    tabindex="2"
+                    @click="isShowToastDeleteSingle = false"
+                >
+                    Không
+                </m-button>
+                <m-button width="100px" tabindex="1" @click="btnDeleteSingleTransferAsset()"
+                    >Xóa</m-button
+                >
+            </TransferToast>
+        </div>
+        <div v-if="isShowToastValidateBE" class="blur">
+            <TransferToast
+                typeToast="warning"
+                :content="toast_content_warning + '.'"
+                :moreInfo="moreInfo"
+            >
+                <m-button
+                    width="100px"
+                    style="border: none"
+                    @clickButton="showToast"
+                    tabindex="2"
+                    @click="isShowToastValidateBE = false"
+                >
+                    Đồng ý
+                </m-button>
+            </TransferToast>
+        </div>
+        <div v-if="isShowToastDelete" class="blur">
+            <TransferToast typeToast="warning" :content="toast_content_delete">
+                <m-button
+                    typeButton="outline"
+                    width="100px"
+                    tabindex="2"
+                    @click="isShowToastDelete = false"
+                >
+                    Không
+                </m-button>
+                <m-button width="100px" tabindex="1" @click="btnDeleteMultiTransferAsset()"
+                    >Xóa</m-button
+                >
+            </TransferToast>
+        </div>
+        <div v-if="isShowToastValidateAriseTransfer" class="blur">
+            <TransferToast
+                typeToast="warning"
+                :content="toast_content_warning + '.'"
+                :moreInfo="moreInfo"
+            >
+                <m-button
+                    width="100px"
+                    style="border: none"
+                    tabindex="1"
+                    @click="isShowToastValidateAriseTransfer = false"
+                >
+                    Đóng
+                </m-button>
+            </TransferToast>
+        </div>
     </div>
 </template>
 
 <script>
-import FixedAssetAPI from '../../api/FixedAsset.API'
+import { rowOnClick, rowOnClickByCheckBox, rowOnCtrlClick } from '../../helper/table/rowSelect'
+import TransferAssetAPI from '../../api/TransferAsset.API'
+import TransferAssetDetailAPI from '../../api/TransferAssetDetail.API'
 import LoadingSkeleton from '../fixed_asset/LoadingSkeleton.vue'
 import AssetTransferPopup from './AssetTransferPopup.vue'
+import { useIsLoading } from '../../../src/stores/isLoading.js'
+import TransferToast from './TransferToast.vue'
+import { showToastDelete } from '../../helper/table/toastHandler'
 
 export default {
     name: 'AssetTransferList',
     components: {
         LoadingSkeleton,
-        AssetTransferPopup
+        AssetTransferPopup,
+        TransferToast
     },
     props: {
         isChangeWidth: {
@@ -364,11 +491,25 @@ export default {
     data() {
         return {
             assets: [],
+            TotalRecords: 0,
+            transferAssets: [],
+            transferAssetDetails: {},
+            action: '',
+            //=====================Toast=============================
+            isShowToastMessage: false,
+            toastMessageContent: '',
+            toastMessageType: 'success',
+            //=====================END Toast=============================
+            details: [],
+            pageLimitOfTrans: 20,
+            pageNumberOfTrans: 1,
+            pageNumberEndOfTrans: 1,
             pageLimit: 20,
-            totalRecords: 0,
-            totalPages: 0,
-            currentPage: 1,
+            pageNumber: 1,
+            pageNumberEnd: 0,
+            totalDetails : 0,
             isLoadingDataTable: false,
+            isLoadingDataDetail: false,
             isShowPopup: false,
             startY: 0,
             initialHeight: 0,
@@ -388,24 +529,67 @@ export default {
             // Chiều cao ban đầu của table top (giá trị không thể đổi)
             tableTopHeightFix: null,
             // Thu gọn table bằng icon
-            isNarrow: false
+            isNarrow: false,
+
+            selectedRowsByCheckBox: [],
+            selectedRows: [],
+            //------------------------------------ Toast --------------------------------
+            isShowToastDelete: false,
+            toast_content_delete: null,
+            isShowToastDeleteSingle: false,
+            toast_content_delete_single: null,
+            isShowToastValidateBE: false,
+            toast_content_warning: null,
+            moreInfo: null,
+            isShowToastAddSuccess: false,
+            isShowToastUpdateSuccess: false,
+            toast_content_success: null,
+            isShowToastValidateAriseTransfer: false
         }
     },
     mounted() {
-        this.loadData()
+        this.loadAllTransferAsset()
     },
     methods: {
-        async loadData() {
+        async loadAllTransferAsset() {
             try {
                 this.isLoadingDataTable = true
-                let res = await FixedAssetAPI.getAllFixedAsset()
-                this.assets = res.data
+                let res = await TransferAssetAPI.getAllTransferAssetPaging(
+                    this.pageLimitOfTrans,
+                    this.pageNumber
+                )
+                this.transferAssets = res.data.TransferAssets
+                this.TotalRecords = res.data.TotalRecords
+                this.pageNumberEndOfTrans = Math.ceil(res.data.TotalRecords / this.pageLimitOfTrans)
             } catch (error) {
                 console.log(error)
             }
             setTimeout(() => {
                 this.isLoadingDataTable = false
+            }, 800)
+        },
+        async loadTransferAssetDetail(transferAssetId) {
+            try {
+                let res = await TransferAssetDetailAPI.getAllDetailPaging(this.pageLimit, this.pageNumber, transferAssetId)
+                this.details = res.data.Entities
+                this.totalDetails = res.data.TotalRecords
+                this.pageNumberEnd = Math.ceil(res.data.TotalRecords / this.pageLimit)
+            } catch (error) {
+                console.log(error)
+            }
+            setTimeout(() => {
+                this.isLoadingDataDetail = false
             }, 1000)
+        },
+        loadDataforEditForm(transferAsset) {
+            this.action = 'update'
+            this.isShowPopup = true
+            this.transferAssetDetails = transferAsset
+        },
+        loadDataForViewOnly(transferAsset){
+            this.action = 'viewOnly'
+            this.isShowPopup = true
+            this.transferAssetDetails = transferAsset
         },
         startResize(event) {
             event.preventDefault() // Ngăn chặn chọn văn bản khi kéo
@@ -420,7 +604,7 @@ export default {
             const newHeight = this.initialHeight + movementY // Tính toán chiều cao mới dựa trên kích thước ban đầu và khoảng cách di chuyển
 
             const contentBodyHeight = this.$refs.contentBody.clientHeight
-            const minHeight = this.$refs.tableTop.clientHeight; // Độ cao tối thiểu
+            const minHeight = this.$refs.tableTop.clientHeight // Độ cao tối thiểu
             const maxHeight = contentBodyHeight // Độ cao tối đa
             // Áp dụng độ cao mới vào resizable-table và giữ nguyên con trỏ
             this.$refs.resizableTable.style.height = `${Math.min(
@@ -438,241 +622,186 @@ export default {
             document.removeEventListener('mousemove', this.resizing)
             document.removeEventListener('mouseup', this.stopResize)
             document.body.style.cursor = 'auto' // Trả lại con trỏ mặc định
+        },
+
+        formatNumber(number) {
+            if (number !== undefined && number !== null) {
+                return number
+                    .toString()
+                    .replace(/\./g, '')
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+            } else {
+                // Xử lý khi biến number là undefined hoặc null
+                return '0' // Hoặc giá trị mặc định khác tùy bạn chọn
+            }
+        },
+        formatDate(inputDate) {
+            const date = new Date(inputDate)
+            const day = String(date.getDate()).padStart(2, '0')
+            const month = String(date.getMonth() + 1).padStart(2, '0') // Lưu ý: Tháng bắt đầu từ 0
+            const year = date.getFullYear()
+            return `${day}/${month}/${year}`
+        },
+        /**
+         * @author LB.Thành (08/08/2023)
+         * @param {*} action Cập nhật lại danh sách chứng từ sau khi thêm, sửa, xóa
+         */
+        updateListTransferAsset(action) {
+            // Cập nhật lại trang
+            this.loadAllTransferAsset()
+            setTimeout(() => {
+                this.showToastMessage(true, this.$_MISAResource.VN.success[action], 'success')
+            }, 1000)
+        },
+
+        deleteSingleTransferAsset(transferAsset) {
+            this.isLoadingDataTable = true
+            var listIds = []
+            listIds.push(transferAsset.TransferAssetId)
+            console.log(listIds)
+            TransferAssetAPI.deleteManyTransferAssets(listIds)
+            this.isLoadingDataTable = false
+        },
+        /**
+         * @author LB.Thành (11/07/2023)
+         * @param {isShow, message, type}
+         * Hiện thông báo khi xử lý logic thành công
+         */
+        showToastMessage(isShow, content, type) {
+            this.isShowToastMessage = isShow
+            this.toastMessageContent = content
+            this.toastMessageType = type
+            this.saveTimer = setTimeout(() => {
+                this.isShowToastMessage = false
+            }, 3000)
+        },
+        //======================================== HANDLE ROW SELECTION =====================================//
+        callRowOnClick(transferAsset) {
+            rowOnClick.call(this, transferAsset)
+        },
+
+        callRowOnClickByCheckBox(transferAsset) {
+            rowOnClickByCheckBox.call(this, transferAsset)
+        },
+
+        callRowOnCtrlClick(transferAsset) {
+            rowOnCtrlClick.call(this, transferAsset)
+            console.log(this.selectedRowsByCheckBox)
+        },
+
+        btnUncheckedAll() {
+            this.selectedRows = []
+            this.selectedRowsByCheckBox = []
+        },
+        //======================================== HANDLE CALCULATE ==========================================//
+        /**
+         * @description Tổng giá trị tất cả chứng từ hiện có trong trang hiện tại
+         * @returns {number} tổng giá trị chứng từ trong trang hiện tại
+         * @author LB.Thành (08/08/2023)
+         */
+        costTotal() {
+            return this.transferAssets.reduce((total, item) => {
+                return total + item.Cost
+            }, 0)
+        },
+        /**
+         * @description Tổng giá trị tất cả chứng từ hiện có trong trang hiện tại
+         * @returns {number} tổng giá trị chứng từ trong trang hiện tại
+         * @author LB.Thành (08/08/2023)
+         */
+        remainTotal() {
+            return this.transferAssets.reduce((total, item) => {
+                return total + item.RemainCost
+            }, 0)
+        },
+        //=========================================== Handle Delete toast =========================================//
+        callToastDeleteSingle(transferAsset) {
+            var listIds = []
+            listIds.push(transferAsset.TransferAssetId)
+            console.log(listIds)
+            this.transferAssetSingle = listIds
+            this.toast_content_delete_single = `${this.$_MISAResource.VN.Form.Warning.DeleteTransfer.Single} 
+                <strong>${transferAsset.TransferAssetCode}</strong> 
+                 không?`
+            this.isShowToastDeleteSingle = true
+        },
+        btnDeleteSingleTransferAsset() {
+            this.deleteTransferAssets(this.transferAssetSingle)
+        },
+        btnDeleteMultiTransferAsset() {
+            const transferAssetIds = this.selectedRowsByCheckBox.map(
+                (transfer) => transfer.TransferAssetId
+            )
+            this.deleteTransferAssets(transferAssetIds)
+            this.selectedRows = []
+        },
+        /**
+         * Thực hiện xóa nhiều bản ghi
+         * @param {*} transferAssetIds
+         */
+        deleteTransferAssets(transferAssetIds) {
+            if (transferAssetIds && transferAssetIds.length > 0) {
+                const requestData = transferAssetIds
+                TransferAssetAPI.deleteManyTransferAssets(requestData)
+                    .then(() => this.loadAllTransferAsset())
+                    .then(() => {
+                        this.updateListTransferAsset('delete')
+                        this.selectedRow = []
+                        this.selectedRowsByCheckBox = []
+                    })
+                    .catch((res) => {
+                        this.isShowToastValidateBE = true
+                        this.toast_content_warning = res.response.data.UserMessage
+                        this.moreInfo = res.response.data.MoreInfo
+                    })
+            }
+            this.isShowToastDelete = false
+            this.isShowToastDeleteSingle = false
+        },
+        callToastDelete() {
+            showToastDelete.call(
+                this,
+                this.$_MISAResource.VN.Form.Warning.DeleteTransfer.Single,
+                this.$_MISAResource.VN.Form.Warning.DeleteTransfer.Multiple
+            )
         }
+    },
+    computed: {
+        /**
+         * @description Kiểm tra xem có đang load dữ liệu hay không
+         * @author LB.Thành (27-07-2023)
+         */
+        isLoading() {
+            return useIsLoading().isLoading
+        },
+        /**
+         * @description Thay đổi trạng thái load dữ liệu
+         * @author LB.Thành (27-07-2023)
+         */
+        setIsLoading() {
+            return useIsLoading().setIsLoading
+        }
+    },
+    watch: {
+        async pageLimitOfTrans() {
+            this.pageNumberOfTrans = 1
+            await this.loadAllTransferAsset()
+        },
+        async pageNumberOfTrans(value) {
+            await this.loadAllTransferAsset()
+        },
+
+        // async pageLimit(value){
+        //     this.pageNumber = 1
+        //     await this.loadTransferAssetDetail(value)
+        // },
+        // async pageNumber(value){
+        //     await this.loadTransferAssetDetail(value)
+        // }
     }
 }
 </script>
 
 <style scoped>
-.content {
-    box-sizing: border-box;
-    display: flex;
-    width: 100%;
-    height: 700px;
-    flex-direction: column;
-    transition: all ease-in-out 0.1s;
-    padding-top: 13px;
-    float: right;
-    padding-bottom: 14px;
-}
-
-.content--top {
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--background-color-default);
-    padding: 8px 8px;
-}
-
-.top-left {
-    display: flex;
-    align-items: center;
-    column-gap: 8px;
-}
-
-.top-left > button {
-    height: 26px !important;
-}
-
-.top-left span {
-    font-size: 20px;
-}
-
-.body-top{
-    display: flex;
-    flex-direction: column;
-
-}
-
-.content--body {
-    width: 100%;
-    height: calc(100% - 36px);
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    border-color: var(--table-border-color);
-}
-
-/* ------------------------------------------- Table ------------------------------------------- */
-.table {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--background-color-default);
-    border-spacing: unset;
-    flex: 1;
-}
-
-.row {
-    display: grid;
-    grid-template-columns: 40px 40px 120px 180px 230px 150px 200px calc(100% - 1080px) 120px;
-    height: 35px;
-}
-
-.resizable-table__row {
-    display: grid;
-    grid-template-columns: 40px 100px 200px 160px 180px 180px 180px calc(100% - 1040px);
-    height: 35px;
-}
-
-.cell {
-    min-height: 35px;
-    background-color: var(--background-color-default);
-    border-color: var(--table-border-color);
-    cursor: pointer;
-}
-
-.icon-function {
-    display: flex;
-    column-gap: 8px;
-}
-
-.header {
-    background-color: var(--background-color-table-head);
-}
-
-.body--row:hover .cell {
-    background-color: var(--table-body-hover);
-}
-
-.body-data {
-    overflow-y: auto;
-    max-height: 175px;
-}
-
-.body-data::-webkit-scrollbar {
-    width: 4px;
-    background-color: #fff;
-}
-
-.body-data::-webkit-scrollbar-thumb {
-    background-color: var(--border);
-    border-radius: 50px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
-    cursor: pointer;
-}
-
-/* ------------------------------------------- Resize-bar ------------------------------------------- */
-.resize-bar {
-    height: 8px;
-    border-color: var(--resize-bar-color);
-    background-color: var(--background-color-default);
-    cursor: ns-resize;
-}
-
-.resizable-table {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.table-bot {
-    flex: 1;
-}
-.table-container {
-    height: calc(698px - 39px);
-    width: 100%;
-    border-radius: 3.5px;
-}
-
-.table {
-    background-color: #ffffff;
-    border-spacing: unset;
-    border: unset;
-    border-radius: 3.5px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
-}
-
-thead {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background-color: #ffffff;
-}
-
-.table__head {
-    font-family: Roboto, sans-serif;
-    font-weight: 700;
-    text-align: left;
-    height: 38px;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 15px;
-    cursor: context-menu;
-}
-
-.table__head--right {
-    text-align: right;
-}
-
-.table__head--center {
-    text-align: center;
-}
-
-#tbodyAsset {
-    height: calc(100% - 38px);
-}
-
-.table__body {
-    font-family: Roboto, sans-serif;
-    font-weight: 400;
-    height: 39px;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 15px;
-    position: relative;
-}
-
-.tr--body-selected {
-    background-color: rgba(26, 164, 200, 0.2);
-}
-
-.tr--body {
-    cursor: pointer;
-}
-
-.tr--body:hover {
-    background-color: rgba(26, 164, 200, 0.2);
-}
-
-.tr--body > .table__body > .icon-function {
-    display: none;
-}
-
-.tr--body:hover > .table__body > .icon-function {
-    display: flex;
-    column-gap: 16px;
-}
-
-.table__body--right {
-    text-align: right;
-}
-
-.table__body--center {
-    text-align: center;
-}
-
-.table__body--center-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icon-function {
-    align-items: center;
-    justify-content: center;
-    column-gap: 16px;
-}
-
-.reload {
-    background-position: -110px -68px;
-    width: 20px;
-    height: 16px;
-    margin-left: 8px;
-}
-
-.contact {
-    background-position: -67px -23px;
-    width: 18px;
-    height: 18px;
-}
+@import '../../css/views/AssetTransfer.css';
 </style>

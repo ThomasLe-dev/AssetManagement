@@ -66,6 +66,12 @@
     height: 16px;
 }
 
+.onlyC{
+    background-position: -22px -378px;
+    width: 20px;
+	height: 13px;
+}
+
 .copy {
     background-position: -244px -112px;
     width: 16px;

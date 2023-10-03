@@ -141,10 +141,8 @@ export default {
     },
     mounted() {
         this.pageNumberEnd = this.numberEnd
-        console.log(this.pageNumberEnd)
     },
     updated() {
-        console.log(this.pageNumberEnd)
     },
     watch: {
         pageNumber(value) {

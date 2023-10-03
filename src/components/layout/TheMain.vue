@@ -29,7 +29,6 @@ export default {
         }
     },
     updated() {
-        console.log('Update Main')
     }
 }
 </script>

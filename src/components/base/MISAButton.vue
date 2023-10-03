@@ -2,7 +2,7 @@ import { watch } from 'vue';
 <template>
     <button
         class="center-y pointer br-4 outline-none m-button relative"
-        :class="[classButton, { hasIcon: !!$slots.icon }, { buttonIcon: typeButton === 'icon' }]"
+        :class="[classButton, { hasIcon: !!$slots.icon }, { buttonIcon: typeButton === 'icon' }, {'dis': readonly}]"
         :disabled="disable"
         :style="styleButton"
         :type="type"
@@ -139,3 +139,8 @@ export default {
     }
 }
 </script>
+<style scoped>
+.dis{
+    background-color: #a0a0a0 !important
+}
+</style>

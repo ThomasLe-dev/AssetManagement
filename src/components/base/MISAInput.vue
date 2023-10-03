@@ -1,23 +1,24 @@
 <template>
-    <label class="flex-column row-gap-10 t-input-misa" :class="classLabel">
-        <p v-if="!!label">{{ label }} <span class="require">*</span></p>
-        <section class="relative center-y">
+    <label class="flex-column row-gap-10 t-input-misa w-100" :class="classLabel">
+        <p v-if="!!label" :class="labelStyle">{{ label }} <span v-if="required" class="require">*</span></p>
+        <section class="relative center-y w-100">
             <section class="wrapper-icon absolute l-7 icon-left" v-if="!!$slots.iconLeft">
                 <slot name="iconLeft"></slot>
             </section>
 
             <input
                 :type="type"
-                class="t-input w-100"
+                class="t-input"
                 :class="[
                     classInput,
                     {
                         't-input-placeholder': placeholderItalics,
                         't-input__icon--left': !!$slots.iconLeft,
-                        't-input__icon--right': !!$slots.iconRight
+                        't-input__icon--right': !!$slots.iconRight,
+                        'dis': readonly
                     },
                     { invalid: invalid },
-                    { readonly: readonly }
+                { readonly: readonly }
                 ]"
                 :placeholder="placeholder"
                 ref="input"
@@ -50,6 +51,10 @@ export default {
     props: {
         // Class của label
         classLabel: {
+            type: String,
+            default: ''
+        },
+        labelStyle: {
             type: String,
             default: ''
         },
@@ -116,6 +121,10 @@ export default {
         maxlength: {
             type: String,
             default: '255'
+        },
+        readonly: {
+            type: Boolean,
+            default: false
         }
     },
     /**
@@ -222,3 +231,8 @@ export default {
     }
 }
 </script>
+<style scoped>
+.dis{
+    background-color: #eaeaea !important
+}
+</style>

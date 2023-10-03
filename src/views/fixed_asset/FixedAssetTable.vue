@@ -8,7 +8,7 @@
                 <m-input
                     placeholder="Tìm kiếm theo mã, tên"
                     placeholderItalics
-                    width="180px"
+                    width="280px"
                     v-model="FixedAssetCodeOrName"
                     @Search="filterListFixedAsset"
                 >
@@ -19,7 +19,7 @@
                     </template>
                 </m-input>
                 <!--  -->
-    
+
                 <!-- Tìm kiếm theo tên loại tài sản -->
                 <m-combobox
                     placeholder="Loại tài sản"
@@ -27,7 +27,7 @@
                     classInput="input-filter"
                     :listSelect="listFixedAssetCategoryName"
                     v-model="FixedAssetCategoryName"
-                    @Search = "filterListFixedAsset"
+                    @Search="filterListFixedAsset"
                 >
                     <template #iconLeft>
                         <section class="icon filter" @click="filterListFixedAsset">
@@ -39,7 +39,7 @@
                     </template>
                 </m-combobox>
                 <!--  -->
-    
+
                 <!-- Tìm kiếm theo tên bộ phận -->
                 <m-combobox
                     placeholder="Bộ phận sử dụng"
@@ -71,14 +71,14 @@
                     Thêm tài sản
                 </m-button>
                 <!--  -->
-    
+
                 <!-- Button export -->
                 <m-button typeButton="icon" @clickButton="showWarning('export')">
                     <section class="icon store"></section>
                     <m-tooltip content="Xuất" />
                 </m-button>
                 <!--     -->
-    
+
                 <!-- Button Xóa tài sản -->
                 <m-button typeButton="icon" @clickButton="showWarning('delete')" action>
                     <section class="icon delete"></section>
@@ -89,13 +89,17 @@
             <!--  -->
         </header>
         <!--  -->
-    
+
         <!-- Table -->
         <section class="layout__table flex-column" tabindex="0">
             <!-- Header -->
             <header class="table__header h-40 grid center-y">
                 <section class="table__checkbox center relative">
-                    <m-checkbox :checked="chooseAll" @change="changeChooseAll" title="Chọn tất cả" />
+                    <m-checkbox
+                        :checked="chooseAll"
+                        @change="changeChooseAll"
+                        title="Chọn tất cả"
+                    />
                 </section>
                 <section class="table__stt relative show-tooltip">
                     STT
@@ -115,7 +119,7 @@
                 <section class="table__option center">Chức năng</section>
             </header>
             <!--  -->
-    
+
             <!-- Body -->
             <main class="table__body">
                 <section v-if="!isLoadingDataTable">
@@ -133,7 +137,7 @@
                         }}
                     </section>
                     <!--  -->
-    
+
                     <!-- Khi có dữ liệu -->
                     <FixedAssetRow
                         v-for="(fixedAsset, index) in listFixedAsset"
@@ -153,7 +157,7 @@
                 <section v-else><LoadingSkeleton v-for="i in pageLimit" :key="i" /></section>
                 <!--  -->
             </main>
-    
+
             <!-- Footer -->
             <footer class="table__footer h-40 grid">
                 <!-- Footer left -->
@@ -163,11 +167,11 @@
                         Tổng số: <span>{{ formatNumber(FixedAssetTotal) }}</span> bản ghi
                     </section>
                     <!--  -->
-    
+
                     <!-- Chọn số tài sản trong một trang -->
                     <m-dropdown v-model="pageLimit" />
                     <!--  -->
-    
+
                     <!-- Thay đổi trang -->
                     <m-paging
                         v-if="pageNumberEnd > 0"
@@ -177,7 +181,7 @@
                     />
                     <!--  -->
                 </section>
-    
+
                 <!-- Footer right -->
                 <section class="table__footer_right grid">
                     <!-- Tổng số lượng tài sản của trang hiện tại -->
@@ -185,19 +189,19 @@
                         {{ formatNumber(quantityTotal) }}
                     </section>
                     <!--  -->
-    
+
                     <!-- Tổng nguyên giá các tài sản trong trang hiện tại  -->
                     <section class="total__cost fw-700 text-right">
                         {{ formatNumber(costTotal) }}
                     </section>
                     <!--  -->
-    
+
                     <!-- Tổng số lượng giá trị hao mòn khấu hao của các tài sản trong trang hiện tại -->
                     <section class="total__depreciation fw-700 text-right">
                         {{ formatNumber(depreciationTotal) }}
                     </section>
                     <!--  -->
-    
+
                     <!-- Tổng số lượng giá trị còn lại tài sản trong trang hiện tại -->
                     <section class="total__remaining fw-700 text-right">
                         {{ formatNumber(remainingTotal) }}
@@ -207,7 +211,7 @@
                 </section>
             </footer>
             <!--  -->
-    
+
             <!-- Form thêm một tài sản mới -->
             <section class="blur" v-if="isShowFormAdd">
                 <section class="assets__edit flex-column px-16 br-4 bg-white pt-16">
@@ -222,7 +226,7 @@
                 </section>
             </section>
             <!--  -->
-    
+
             <!-- Thông báo warning -->
             <section class="blur center" v-if="isShowToastMessageWarning">
                 <m-toast
@@ -249,13 +253,46 @@
                 </m-toast>
             </section>
             <!--  -->
-    
+
             <!-- Thông báo thành công -->
             <section class="toast__message" v-if="isShowToastMessage">
                 <m-toast :typeToast="toastMessageType" :content="toastMessageContent" />
             </section>
             <!--  -->
         </section>
+        <div v-if="isShowToastValidateAriseTransfer" class="blur">
+            <TransferToast
+                typeToast="warning"
+                :content="toast_content_warning + '.'"
+                :moreInfo="moreInfo"
+            >
+                <m-button
+                    width="100px"
+                    style="border: none"
+                    tabindex="1"
+                    @click="isShowToastValidateAriseTransfer = false"
+                >
+                    Đóng
+                </m-button>
+            </TransferToast>
+        </div>
+        <div v-if="isShowToastValidateBE" class="blur">
+            <TransferToast
+                typeToast="warning"
+                :content="toast_content_warning + '.'"
+                :moreInfo="moreInfo"
+            >
+                <m-button
+                    width="100px"
+                    style="border: none"
+                    @clickButton="showToast"
+                    tabindex="2"
+                    @click="isShowToastValidateBE = false"
+                >
+                    Đồng ý
+                </m-button>
+            </TransferToast>
+        </div>
         <!--  -->
     </div>
 </template>
@@ -267,6 +304,7 @@ import FixedAssetAPI from '/src/api/FixedAsset.API'
 import FixedAssetRow from './FixedAssetRow.vue'
 import LoadingSkeleton from './LoadingSkeleton.vue'
 import { useIsLoading } from '/src/stores/isLoading.js'
+import TransferToast from '../fixed_asset_transfer/TransferToast.vue'
 
 export default {
     name: 'FixedAssetTable',
@@ -276,7 +314,8 @@ export default {
      */
     components: {
         FixedAssetRow,
-        LoadingSkeleton
+        LoadingSkeleton,
+        TransferToast
     },
     /**
      * @author LB.Thành (11/07/2023)
@@ -322,7 +361,19 @@ export default {
             FixedAssetTotal: 0,
             // Check xem là xóa hay là xuất excel
             action: '',
-            focusElementToastWarning: 'submit'
+            focusElementToastWarning: 'submit',
+            //------------------------------------ Toast --------------------------------
+            isShowToastDelete: false,
+            toast_content_delete: null,
+            isShowToastDeleteSingle: false,
+            toast_content_delete_single: null,
+            isShowToastValidateBE: false,
+            toast_content_warning: null,
+            moreInfo: null,
+            isShowToastAddSuccess: false,
+            isShowToastUpdateSuccess: false,
+            toast_content_success: null,
+            isShowToastValidateAriseTransfer: false
         }
     },
     /**
@@ -366,8 +417,8 @@ export default {
                 this.isLoadingDataTable = true
                 const res = await FixedAssetAPI.getFixedAssetPaging(fixedAssetFilter)
                 this.listFixedAsset = res.data.FixedAssets
-                this.pageNumberEnd = Math.ceil(res.data.FixedAssetTotal / this.pageLimit)
-                this.FixedAssetTotal = res.data.FixedAssetTotal
+                this.pageNumberEnd = Math.ceil(res.data.TotalRecords / this.pageLimit)
+                this.FixedAssetTotal = res.data.TotalRecords
             } catch (error) {
                 this.showToastMessage(true, this.$_MISAResource.error.loadData, 'error')
             }
@@ -611,11 +662,17 @@ export default {
          * Format số
          */
         formatNumber(number) {
-            return number
-                .toString()
-                .replace(/\./g, '')
-                .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+            if (number !== undefined && number !== null) {
+                return number
+                    .toString()
+                    .replace(/\./g, '')
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+            } else {
+                // Xử lý khi biến number là undefined hoặc null
+                return '0' // Hoặc giá trị mặc định khác tùy bạn chọn
+            }
         },
+
         /**
          * @description Xử lý khi thay đổi số bản ghi trên 1 trang
          * @param {*} value
@@ -698,21 +755,21 @@ export default {
          */
         depreciationTotal() {
             // Lấy thời điểm hiện tại
-            var currentDate = new Date();
+            var currentDate = new Date()
 
             // Sử dụng phương thức reduce để tính tổng giá trị khấu hao lũy kế
             var totalDepreciation = this.listFixedAsset.reduce((total, item) => {
                 // Chuyển định dạng StartUsingDate từ chuỗi sang đối tượng Date
-                var startUsingDate = new Date(item.StartUsingDate);
-                
-                // Tính số năm đã trôi qua từ thời điểm StartUsingDate đến thời điểm hiện tại
-                var yearsPassed = currentDate.getFullYear() - startUsingDate.getFullYear();
-                
-                // Tính giá trị khấu hao lũy kế cho từng tài sản và cộng vào tổng
-                return total + (yearsPassed * (item.DepreciationRate/100 * item.Cost));
-            }, 0);
+                var startUsingDate = new Date(item.StartUsingDate)
 
-            return totalDepreciation.toFixed(0);
+                // Tính số năm đã trôi qua từ thời điểm StartUsingDate đến thời điểm hiện tại
+                var yearsPassed = currentDate.getFullYear() - startUsingDate.getFullYear()
+
+                // Tính giá trị khấu hao lũy kế cho từng tài sản và cộng vào tổng
+                return total + yearsPassed * ((item.DepreciationRate / 100) * item.Cost)
+            }, 0)
+
+            return totalDepreciation.toFixed(0)
         },
         /**
          * @description Tổng giá trị còn lại tài sản hiện có trong trang hiện tại

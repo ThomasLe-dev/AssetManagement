@@ -23,6 +23,10 @@
     column-gap: 20px !important;
 }
 
+.col-gap-50 {
+    column-gap: 50px !important;
+}
+
 .row-gap-3 {
     row-gap: 3px !important;
 }
@@ -218,6 +222,10 @@
     border-radius: 6px !important;
 }
 
+.br-8 {
+    border-radius: 8px !important;
+}
+
 .fw-500 {
     font-weight: 500 !important;
 }
@@ -306,6 +314,10 @@
     font-size: 1.4rem !important;
 }
 
+.mr-20{
+    margin-right: 20px !important;
+}
+
 .mt-200 {
     margin-top: 200px !important;
 }
@@ -320,4 +332,12 @@
 
 .z-999 {
     z-index: 999 !important;
+}
+
+.font-14{
+    font-size: 14px !important;
+}
+
+.c-pointer{
+    cursor: pointer;
 }

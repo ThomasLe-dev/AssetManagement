@@ -1,11 +1,11 @@
 <template>
     <label
-        class="flex-column t-combobox row-gap-10 pointer"
+        class="flex-column t-combobox row-gap-10 pointer w-100"
         :class="classLabel"
         :style="styleCombobox"
     >
-        <p v-if="!!label">{{ label }} <span class="require" v-if="required">*</span></p>
-        <section class="relative center-y" v-click-outside="() => (isShowListSelect = false)">
+        <p v-if="!!label" :class="labelStyle">{{ label }} <span class="require" v-if="required">*</span></p>
+        <section class="relative center-y w-100" v-click-outside="() => (isShowListSelect = false)" ref="wrapper" >
             <section class="wrapper-icon absolute l-7 left" v-if="!!$slots.iconLeft">
                 <slot name="iconLeft"></slot>
             </section>
@@ -17,7 +17,8 @@
                     {
                         't-combobox-placeholder': placeholderItalics,
                         't-combobox__icon--left': !!$slots.iconLeft,
-                        't-combobox__icon--right': !!$slots.iconRight
+                        't-combobox__icon--right': !!$slots.iconRight,
+                        'dis': readonly
                     },
                     { invalid: invalid }
                 ]"
@@ -53,29 +54,31 @@
             <section class="wrapper-icon icon-down absolute r-6" @click="toggleIcon">
                 <section class="icon down"></section>
             </section>
-
-            <ul
-                class="combobox__select--list absolute br-4 w-100"
-                v-show="isShowListSelect"
-                ref="list"
-            >
-                <section v-if="listItemView.length > 0">
-                    <li
-                        class="combobox__select--item center-y col-gap-6"
-                        v-for="(item, index) in listItemView"
-                        :key="item"
-                        :class="{ active: indexFocusActive === index || indexChoose === index }"
-                        @mouseenter="this.indexFocusActive = index"
-                        @click="selectItem(item)"
-                    >
-                        <section class="wrapper-icon">
-                            <section class="icon check" v-if="indexChoose === index"></section>
-                        </section>
-                        <span class="title" :title="item">{{ item }}</span>
-                    </li>
-                </section>
-                <li class="combobox__select--item" v-else>{{ this.$_MISAResource.VN.noResult }}</li>
-            </ul>
+            <Teleport to="body">
+                <ul
+                    class="combobox__select--list absolute br-4 "
+                    :style="{top: top + 'px', left: left + 'px', width: width + 'px'}"
+                    v-show="isShowListSelect"
+                    ref="list"
+                >
+                    <section v-if="listItemView.length > 0">
+                        <li
+                            class="combobox__select--item center-y col-gap-6"
+                            v-for="(item, index) in listItemView"
+                            :key="item"
+                            :class="{ active: indexFocusActive === index || indexChoose === index }"
+                            @mouseenter="this.indexFocusActive = index"
+                            @click="selectItem(item)"
+                        >
+                            <section class="wrapper-icon">
+                                <section class="icon check" v-if="indexChoose === index"></section>
+                            </section>
+                            <span class="title" :title="item">{{ item }}</span>
+                        </li>
+                    </section>
+                    <li class="combobox__select--item" v-else>{{ this.$_MISAResource.VN.noResult }}</li>
+                </ul>
+            </Teleport>
         </section>
     </label>
 </template>
@@ -91,6 +94,10 @@ export default {
     props: {
         // Label của combobox
         label: {
+            type: String,
+            default: ''
+        },
+        labelStyle: {
             type: String,
             default: ''
         },
@@ -142,6 +149,10 @@ export default {
         tabindex:{
             type: String,
             default: 0
+        },
+        readonly: {
+            type: Boolean,
+            default: false
         }
     },
     /**
@@ -161,7 +172,11 @@ export default {
             // Trạng thái input
             invalid: false,
             // vị trí được chọn
-            indexChoose: null
+            indexChoose: null,
+            originPosition: null,
+            top: null,
+            left: null,
+            width: null
         }
     },
     /**
@@ -192,6 +207,13 @@ export default {
          */
         toggleIcon() {
             this.isShowListSelect = !this.isShowListSelect
+            this.setPosForList()
+        },
+        setPosForList() {
+            this.originPosition = this.$refs.wrapper.getBoundingClientRect()
+            this.top = this.originPosition.bottom + 2
+            this.left = this.originPosition.left 
+            this.width = this.originPosition.width
         },
         /**
          * Author: LB.Thành (04/07/2023)
@@ -357,3 +379,8 @@ export default {
     }
 }
 </script>
+<style scoped>
+.dis{
+    background-color: #eaeaea !important
+}
+</style>
